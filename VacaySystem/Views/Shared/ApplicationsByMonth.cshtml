@@ -1,0 +1,51 @@
+﻿@using System.Globalization
+@{
+    ViewData["Title"] = "Applications By Month";
+}
+
+<h1>Applications By Month</h1>
+
+<form asp-controller="ApplicationInfo" asp-action="ApplicationsByMonth" method="post">
+    <label for="month">Select Month:</label>
+<select id="month" name="month">
+    @for (int i = 1; i <= 12; i++)
+    {
+        var isSelected = i == ViewBag.SelectedMonth ? "selected" : ""; // Only set "selected" if i matches ViewBag.SelectedMonth
+        <option value="@i" selected=@isSelected>@CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(i)</option>
+    }
+</select>
+
+<select id="year" name="year">
+    @for (int i = 2023; i <= 2024; i++)
+    {
+        var isSelected = i == ViewBag.SelectedYear ? "selected" : ""; // Only set "selected" if i matches ViewBag.SelectedYear
+        <option value="@i" selected=@isSelected>@i</option>
+    }
+</select>
+
+    <button type="submit">Search</button>
+</form>
+
+<div id="applicationResult">
+    @if ((bool)(ViewBag.HasApplications ?? false))
+    {
+        foreach (var item in (Dictionary<string, List<(DateTime, DateTime)>>)ViewData["VacayApplications"])
+        {
+            <p>Employee: @item.Key</p>
+            <ul>
+                @foreach (var leavePeriod in item.Value)
+                {
+                    var daysRequested = (leavePeriod.Item2 - leavePeriod.Item1).TotalDays;
+                    <li>Start Date: @leavePeriod.Item1.ToShortDateString() - 
+                        End Date: @leavePeriod.Item2.ToShortDateString() -
+                        Days Requested: @daysRequested
+                    </li>
+                }
+            </ul>
+        }
+    }
+    else
+    {
+        <p>No leave applications found for the selected period.</p>
+    }
+</div>
